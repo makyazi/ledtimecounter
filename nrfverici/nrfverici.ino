@@ -10,6 +10,7 @@
 #define SW 4
 #define OLED_RESET 4
 #define psw 10
+#define osw 9
 ///////////////////////////////////////////////////////////////////////////
 Timer t;
 Adafruit_SSD1306 display(OLED_RESET);
@@ -192,7 +193,10 @@ void sending()//veri gönderme
 {
     //adt++;Serial.print("adt="); Serial.println(adt);//göndrme sayısı
     int ssw=digitalRead(psw);//butonu oku
-    sayi[0]=ssw;//    
+    int ssw2=digitalRead(osw);//butonu oku
+    if (ssw==0&ssw2==0)sayi[0]=0;
+    if (ssw==1)sayi[0]=1;
+    if (ssw2==1)sayi[0]=2; 
     radio.write(sayi, sizeof(sayi));//gönder
     Serial.println(sayi[0]);
     Serial.println("sending");
@@ -213,6 +217,12 @@ void sending()//veri gönderme
       }
 } 
 ///////////////////////////////////////////////////////////////////////////
+void sendbuton()
+{
+  sayi[0]=2;
+  sending();
+}
+///////////////////////////////////////////////////////////////////////////
 void setup()
 {
   Serial.begin(9600);
@@ -224,10 +234,12 @@ void setup()
   display.setTextColor(WHITE);
   display.setCursor(22,0);
   display.println("elektrobil");
-  t.every(2000, sending);// 2 sn de bi gönder 
+  t.every(500, sending);// 2 sn de bi gönder 
   display.display();
   delay(1000);
   pinMode(psw, INPUT);
+  pinMode(osw, INPUT);
+  //attachInterrupt(digitalPinToInterrupt(osw), sendbuton, HIGH);
   display.clearDisplay();
   radio.begin();
   radio.openWritingPipe(kod);
